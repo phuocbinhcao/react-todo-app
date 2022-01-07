@@ -1,0 +1,22 @@
+.App {
+  text-align: center;
+  margin: 50px auto;
+  padding: 10px;
+  border: 1px solid black;
+  width: 400px;
+}
+.todo-input {
+  width: 270px;
+  margin-right: 2px;
+  margin-bottom: 10px;
+  
+}
+.todo-lists{
+  height: 30px;
+  display:flex ;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid gray;
+  margin-top: 15px;
+}
+
