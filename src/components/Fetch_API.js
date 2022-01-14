@@ -3,77 +3,117 @@ import { map, filter, find } from "lodash";
 import moment from "moment";
 // import Storage from './components/Storage';
 
-function Input() {
+function Fetch_API() {
   const [job, setJob] = useState("");
-  const [menus, setMenus] = useState(() => {
-    const storageJobs = JSON.parse(localStorage.getItem("menus"));
-    return storageJobs ?? [];
-  });
+  const [menus, setMenus] = useState([]);
   const [editSubmit, setEditSubmit] = useState(true);
   const [isEditSubmit, setIsEditSubmit] = useState(null);
 
+  const apiUrl = "https://61dc41c6591c3a0017e1a7f0.mockapi.io/todo/";
+
   useEffect(() => {
-    localStorage.setItem("menus", JSON.stringify(menus));
-  }, [menus]);
+    fetch(apiUrl)
+      .then((res) => res.json())
+      .then((newJob) => {
+        setMenus(newJob);
+      });
+  }, []);
 
   // Add todo
-  const handleAdd = () => {
+  const handleAdd = (id) => {
     if (!job) return null;
     if (job && !editSubmit) {
-      setMenus(
-        map(menus, (menu) => {
-          if (menu.id === isEditSubmit) {
-            return { ...menu, name: job };
-          }
-          return menu;
-        })
-      );
-      setEditSubmit(true);
+      const data = {
+        name: job,
+        
+      };
+      const options = {
+        method: "PUT",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      fetch(apiUrl, options)
+        .then((res) => res.json())
+        .then(() => {
+          setMenus([
+          ...map(menus, (menu) => {
+            if (menu.id === isEditSubmit) {
+              return { ...menu, name: job };
+            }
+            return menu;
+          })
+        ])
+        });
+        setEditSubmit(true);
       setJob("");
       setIsEditSubmit(null);
-    } else {
-      const allJob = {
-        id: new Date().getTime().toString(),
+    } 
+    else {
+      const data = {
         name: job,
         status: false,
-        time: moment().format("DD/MM/YYYY - HH:mm:ss"),
+        time: new Date().getTime(),
       };
-      setMenus([...menus, allJob]);
+      const options = {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      fetch(apiUrl, options)
+        .then((res) => res.json())
+        .then((newJob) => {
+          setMenus([...menus, newJob]);
+        });
       setJob("");
     }
   };
 
   // Edit todo
   const editItem = (id) => {
-    const newEditJob = find([...menus], (menu) => {
-      return menu.id === id;
-    });
-    setEditSubmit(false);
-    setJob(newEditJob.name);
-    setIsEditSubmit(id);
+    const updateItem = {
+      method: "GET",
+    };
+    fetch(apiUrl + id, updateItem)
+      .then((res) => res.json())
+      .then(() => {
+        const newEditJob = find([...menus], (menu) => {
+          return menu.id === id;
+        });
+        console.log(newEditJob.name);
+
+        setEditSubmit(false);
+        setJob(newEditJob.name);
+        setIsEditSubmit(id);
+      });
   };
 
   //delete item
-  const deleteItem = (index) => {
-    const updateMenus = filter(menus, (menu) => {
-      return index !== menu.id;
-    });
-    setMenus(updateMenus);
+  const deleteItem = (id) => {
+    const delOptons = {
+      method: "DELETE",
+    };
+    fetch(apiUrl + id, delOptons)
+      .then((res) => res.json())
+      .then(() => {
+        const deleteItem = filter(menus, (menu) => {
+          return id !== menu.id;
+        });
+        setMenus(deleteItem);
+      });
+  };
+
+  const DeleteAll = () => {
+    setMenus([]);
   };
   //total todo list
   const total = filter(menus, (menu) => !menu.status).length;
 
-  // delete all
-  const DeleteAll = () => {
-    setMenus([]);
-  };
-
   const onChange = (id) => {
-    setMenus(
-      map(menus, (menu) =>
-        menu.id === id ? { ...menu, status: !menu.status } : menu
-      )
-    );
+
   };
 
   return (
@@ -111,14 +151,14 @@ function Input() {
                   menu.status ? "text-decoration-line-through" : "text-gray"
                 }`}
               >
-                {menu.name}{" "}
+                {menu.name}
               </span>
               <span
                 className={`${
                   menu.status ? "text-decoration-line-through" : "text-gray"
                 }`}
               >
-                {menu.time}
+                {moment(menu.time).format("DD/MM/YYYY - HH:mm:ss")}
               </span>
               <div className="todo-list">
                 <i
@@ -144,4 +184,4 @@ function Input() {
     </div>
   );
 }
-export default Input;
+export default Fetch_API;
