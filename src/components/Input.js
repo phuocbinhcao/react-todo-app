@@ -3,7 +3,7 @@ import { map, filter, find } from "lodash";
 import moment from "moment";
 // import Storage from './components/Storage';
 
-function Input() {
+function Todo() {
   const [job, setJob] = useState("");
   const [menus, setMenus] = useState(() => {
     const storageJobs = JSON.parse(localStorage.getItem("menus"));
@@ -144,4 +144,4 @@ function Input() {
     </div>
   );
 }
-export default Input;
+export default Todo;
